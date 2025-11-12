@@ -37,6 +37,10 @@ def main():
         mensagem = gerar_mensagem(dados)
         enviar_alerta(mensagem)
         time.sleep(60)
+        
+# --- Teste manual de envio ---
+enviar_alerta("🚀 Teste: o Robô Over Gols está online e ativo!")
+        
 
 # --- Mantém o app ativo no Render ---
 from flask import Flask
