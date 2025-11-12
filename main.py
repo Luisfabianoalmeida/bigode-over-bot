@@ -153,21 +153,30 @@ def run_bot():
     already_sent = set()
 
     while True:
+        print("🔄 Rodando... buscando jogos ao vivo.")
         games = get_live_games()
 
+        print(f"📊 Jogos encontrados: {len(games)}")
+
         for event in games:
+            try:
+                home = event["homeTeam"]["name"]
+                away = event["awayTeam"]["name"]
+                print(f"⚽ Analisando: {home} x {away}")
+            except:
+                pass
+
             alert = analyze_game(event)
 
             if alert:
                 event_id = event["id"]
-
-                # evita repetição a cada 60s
                 if event_id not in already_sent:
+                    print("🚨 ALERTA ENVIADO!")
                     send_message(alert)
                     already_sent.add(event_id)
 
+        print("⏳ Aguardando 60 segundos...\n")
         time.sleep(60)
-
 
 # ======================================================
 # FLASK APENAS PARA HEALTHCHECK
