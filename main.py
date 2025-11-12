@@ -1,26 +1,3 @@
-import requestes
-import random
-import time
-
-BOT_TOKEN = "COLE_SEU_TOKEN_AQUI"
-CHAT_ID = "6655882510"
-
-def enviar_alerta(mensagem):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "HTML"}
-    requests.post(url, data=payload)
-    print("🚀 Alerta enviado!")
-
-def obter_dados_jogo():
-    return {
-        "liga": random.choice(["UEFA Champions League", "Copa do Brasil", "Premier League"]),
-        "mandante": random.choice(["AS Roma", "Flamengo", "Palmeiras", "Chelsea"]),
-        "visitante": random.choice(["Valerenga", "Corinthians", "Atlético-MG", "Liverpool"]),
-        "minuto": random.randint(5, 40),
-        "placar_mandante": 0,
-        "placar_visitante": 0,
-        "posse_mandante": 0
-    }                                            
 import requests
 import random
 import time
