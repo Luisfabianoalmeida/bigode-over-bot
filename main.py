@@ -178,13 +178,6 @@ def run_bot():
         print("⏳ Aguardando 60 segundos...\n")
         time.sleep(60)
 
-# ======================================================
-# FLASK APENAS PARA HEALTHCHECK
-# ======================================================
-@app.route("/")
-def home():
-    return "BOT OVER GOLS RODANDO!"
-
 
 # ======================================================
 # INÍCIO
