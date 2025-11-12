@@ -21,6 +21,7 @@ def obter_dados_jogo():
         "placar_mandante": 0,
         "placar_visitante": 0,
         "posse_mandante": 0
+    }
 [20:52, 11/11/2025] Luis Fabiano: import requests
 import random
 import time
