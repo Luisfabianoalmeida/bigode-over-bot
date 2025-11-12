@@ -20,7 +20,7 @@ def obter_dados_jogo():
         "minuto": random.randint(5, 40),
         "placar_mandante": 0,
         "placar_visitante": 0,
-        "posse_ma…
+        "posse_mandante":
 [20:52, 11/11/2025] Luis Fabiano: import requests
 import random
 import time
