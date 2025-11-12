@@ -2,7 +2,7 @@ import requests
 import random
 import time
 
-BOT_TOKEN = "8544364550:AAGB37CwzJWVJt7DSaf0H6DU28F9wh2IgPA"
+BOT_TOKEN = "8544364550:AAGB37CwzJWVJt7DSafOH6DU28F9Wh2IgPA"
 CHAT_ID = "6655882510"
 
 def enviar_alerta(mensagem):
