@@ -38,5 +38,18 @@ def main():
         enviar_alerta(mensagem)
         time.sleep(60)
 
+# --- Mantém o app ativo no Render ---
+from flask import Flask
+import threading, os
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "🤖 Robô Over Gols ativo e enviando alertas no Telegram!"
+
 if __name__ == "__main__":
-    main()
+    t = threading.Thread(target=main)
+    t.start()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
