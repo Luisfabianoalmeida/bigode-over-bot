@@ -1,7 +1,6 @@
 import requests
 import time
 
-
 # ======================================================
 # CONFIGURAÇÕES — COLOQUE SEUS DADOS AQUI
 # ======================================================
@@ -63,28 +62,24 @@ def get_stats(event_id):
             for item in group["groups"]:
                 name = item["name"]
 
-                # Finalizações totais
                 if name == "Total shots":
                     stats["shots_total"] = (
                         item["statisticsItems"][0]["home"] +
                         item["statisticsItems"][0]["away"]
                     )
 
-                # Finalizações no alvo
                 if name == "Shots on target":
                     stats["shots_on_target"] = (
                         item["statisticsItems"][0]["home"] +
                         item["statisticsItems"][0]["away"]
                     )
 
-                # Escanteios
                 if name == "Corner kicks":
                     stats["corners"] = (
                         item["statisticsItems"][0]["home"] +
                         item["statisticsItems"][0]["away"]
                     )
 
-                # Ataques perigosos
                 if name == "Dangerous attacks":
                     stats["dangerous_attacks"] = (
                         item["statisticsItems"][0]["home"] +
@@ -95,20 +90,19 @@ def get_stats(event_id):
 
 
 # ======================================================
-# LÓGICA DE ANÁLISE — MODO 3 (AGRESSIVO)
+# LÓGICA DE ANÁLISE — INCLUI TESTE (5 FINALIZAÇÕES NO ALVO)
 # ======================================================
 def analyze_game(event):
     minute = event.get("time", {}).get("minute")
 
-    if not minute or minute < 12:
+    if not minute or minute < 1:
         return None
 
     home = event["homeTeam"]["name"]
     away = event["awayTeam"]["name"]
-
     event_id = event["id"]
-    stats = get_stats(event_id)
 
+    stats = get_stats(event_id)
     if not stats:
         return None
 
@@ -117,17 +111,12 @@ def analyze_game(event):
     corners = stats["corners"]
     dang = stats["dangerous_attacks"]
 
-    # ----------------------------------------------
-    # CÁLCULO DA PRESSÃO (modo agressivo)
-    # ----------------------------------------------
-    pressure = (shots_total * 2) + (shots_on * 3) + (corners * 2) + (dang / 5)
-
- # ALERTA MODO TESTE – 5 finalizações no alvo
-if shots_on >= 5:
-    msg = f"""
+    # ------------------ ALERTA DE TESTE -------------------
+    if shots_on >= 5:
+        msg = f"""
 🔥 <b>ALERTA OVER (TESTE)</b>
 
-🏟 <b>{home} x {away}</b>
+⚽ <b>{home}</b> x <b>{away}</b>
 ⏱ Minuto: <b>{minute}</b>
 
 🎯 Finalizações totais: <b>{shots_total}</b>
@@ -135,9 +124,9 @@ if shots_on >= 5:
 ⛳ Escanteios: <b>{corners}</b>
 ⚡ Ataques perigosos: <b>{dang}</b>
 
-👉 Regra de teste: enviando alerta com 5 finalizações no alvo.
+🧪 Regra de teste: 5 finalizações no alvo!
 """
-    return msg
+        return msg
 
     return None
 
@@ -151,10 +140,10 @@ def run_bot():
     while True:
         print("🔄 Rodando... buscando jogos ao vivo.")
         games = get_live_games()
-
         print(f"📊 Jogos encontrados: {len(games)}")
 
         for event in games:
+
             try:
                 home = event["homeTeam"]["name"]
                 away = event["awayTeam"]["name"]
