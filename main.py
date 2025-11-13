@@ -2,99 +2,177 @@ import requests
 import time
 import threading
 
-# ======================================
-# CONFIGURAÇÕES DO BOT
-# ======================================
 TELEGRAM_TOKEN = "8544364550:AAGB37CwzJWVJt7DSafOH6DU28F9Wh2IgPA"
 CHAT_ID = "6655882510"
 
+# ======================================
+# FUNÇÃO PARA ENVIAR MENSAGEM AO TELEGRAM
+# ======================================
 def send_message(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     data = {"chat_id": CHAT_ID, "text": text}
-
     try:
         requests.post(url, data=data, timeout=5)
-    except Exception as e:
-        print("Erro ao enviar mensagem:", e)
+    except:
+        pass
 
 
 # ======================================
-# PEGAR ESTATÍSTICAS DOS JOGOS
+# PEGAR TODOS OS JOGOS AO VIVO DO SOFASCORE
 # ======================================
-def get_match_stats(match_id):
+def get_live_matches():
+    try:
+        url = "https://api.sofascore.com/api/v1/sport/football/events/live"
+        r = requests.get(url, timeout=5)
+        if r.status_code == 200:
+            return r.json().get("events", [])
+        return []
+    except:
+        return []
+
+
+# ======================================
+# PEGAR ESTATÍSTICAS DO JOGO
+# ======================================
+def get_stats(match_id):
     try:
         url = f"https://api.sofascore.com/api/v1/event/{match_id}/statistics"
-        response = requests.get(url, timeout=5)
-
-        if response.status_code == 200:
-            return response.json()
-
+        r = requests.get(url, timeout=5)
+        if r.status_code == 200:
+            return r.json()
         return None
-
-    except Exception as e:
-        print("Erro ao buscar dados:", e)
+    except:
         return None
 
 
 # ======================================
-# LÓGICA DO ROBÔ
-# ALERTA QUANDO TIVER 5 CHUTES SOMADOS
+# MONITORAMENTO COM PRESSÃO MODERADA
 # ======================================
-def monitor_games():
+last_alert = {}  # guarda último alerta por jogo
 
-    # IDs de teste (trocar depois pelos reais)
-    MATCHES = [123456, 789101]
 
-    send_message("🤖 Robô OverGols iniciado com sucesso!")
+def monitor():
+    send_message("🤖 Robô OverGols Iniciado com Sucesso! Monitorando jogos ao vivo...")
 
     while True:
-        for match_id in MATCHES:
-            data = get_match_stats(match_id)
+        matches = get_live_matches()
 
-            if not data:
+        for match in matches:
+
+            match_id = match["id"]
+            home = match["homeTeam"]["name"]
+            away = match["awayTeam"]["name"]
+            league = match["tournament"]["name"]
+            minute = match.get("time", {}).get("currentPeriodStartTimestamp", 0)
+
+            score_home = match["homeScore"]["current"]
+            score_away = match["awayScore"]["current"]
+
+            stats = get_stats(match_id)
+            if not stats:
                 continue
 
-            total_shots = 0
+            attacks_home = 0
+            attacks_away = 0
+            dangerous_home = 0
+            dangerous_away = 0
+            corners_home = 0
+            corners_away = 0
+            shots_home = 0
+            shots_away = 0
+            target_home = 0
+            target_away = 0
+            possession_home = 0
+            possession_away = 0
 
+            # --------------------------------------
+            # PEGANDO TODAS AS ESTATÍSTICAS NECESSÁRIAS
+            # --------------------------------------
             try:
-                stats = data["statistics"][0]["groups"]
-
-                for group in stats:
+                groups = stats["statistics"][0]["groups"]
+                for group in groups:
                     for item in group["statisticsItems"]:
-                        if item["name"] == "Shots on target":
-                            total_shots += item["home"]
-                            total_shots += item["away"]
+                        name = item["name"]
+
+                        if name == "Attacks":
+                            attacks_home = item["home"]
+                            attacks_away = item["away"]
+
+                        if name == "Dangerous Attacks":
+                            dangerous_home = item["home"]
+                            dangerous_away = item["away"]
+
+                        if name == "Corner kicks":
+                            corners_home = item["home"]
+                            corners_away = item["away"]
+
+                        if name == "Shots":
+                            shots_home = item["home"]
+                            shots_away = item["away"]
+
+                        if name == "Shots on target":
+                            target_home = item["home"]
+                            target_away = item["away"]
+
+                        if name == "Ball possession":
+                            possession_home = item["home"]
+                            possession_away = item["away"]
 
             except:
-                pass
+                continue
 
-            if total_shots >= 5:
-                send_message(
-                    f"🔥 Pressão detectada!\n"
-                    f"Jogo ID: {match_id}\n"
-                    f"Chutes no gol: {total_shots}"
-                )
+            # SOMATÓRIOS
+            total_attacks = dangerous_home + dangerous_away + attacks_home + attacks_away
+            total_shots = shots_home + shots_away
+            total_targets = target_home + target_away
+            total_corners = corners_home + corners_away
 
-        time.sleep(30)
+            # -------------------------
+            # GATILHOS DE PRESSÃO (MODERADO)
+            # -------------------------
+            if total_attacks >= 55 and total_shots >= 10 and total_targets >= 3 and total_corners >= 4:
+
+                last = last_alert.get(match_id, 0)
+
+                # evita spam extremo
+                if time.time() - last >= 180:  # 3 minutos
+                    last_alert[match_id] = time.time()
+
+                    msg = f"""
+💎 [Robô Over Gols - PREMIUM detectou uma chance quente!]
+
+🏟 {league}
+⚽️ {home} v {away}
+🔢 Placar do jogo: {score_home} - {score_away}
+
+📊 Dados do jogo (Mandante - Visitante):
+
+- Investidas ofensivas: {attacks_home + dangerous_home} - {attacks_away + dangerous_away}
+- Escanteios: {corners_home} - {corners_away}
+- Arremates: {shots_home} - {shots_away}
+- Tentativas no alvo: {target_home} - {target_away}
+- Controle da bola: {possession_home} - {possession_away}
+
+🔥 Sinal: Mais 1 gol na partida
+                    """
+
+                    send_message(msg)
+
+        time.sleep(20)
 
 
 # ======================================
-# THREAD PARA O LOOP RODAR NO RENDER
+# THREAD PRINCIPAL
 # ======================================
-def start_thread():
-    t = threading.Thread(target=monitor_games)
+def start():
+    t = threading.Thread(target=monitor)
     t.daemon = True
     t.start()
 
 
-# ======================================
-# INÍCIO DO PROGRAMA
-# ======================================
 if __name__ == "__main__":
-    start_thread()
+    start()
 
-    # Mantém o app vivo no Render
     while True:
         time.sleep(60)
-
                
