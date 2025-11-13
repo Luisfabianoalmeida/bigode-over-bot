@@ -1,4 +1,4 @@
-import requests
+requests
 import time
 
 # ======================================================
@@ -82,90 +82,4 @@ def get_stats(event_id):
 
                 if name == "Dangerous attacks":
                     stats["dangerous_attacks"] = (
-                        item["statisticsItems"][0]["home"] +
-                        item["statisticsItems"][0]["away"]
-                    )
-
-    return stats
-
-
-# ======================================================
-# LÓGICA DE ANÁLISE — INCLUI TESTE (5 FINALIZAÇÕES NO ALVO)
-# ======================================================
-def analyze_game(event):
-    minute = event.get("time", {}).get("minute")
-
-    if not minute or minute < 1:
-        return None
-
-    home = event["homeTeam"]["name"]
-    away = event["awayTeam"]["name"]
-    event_id = event["id"]
-
-    stats = get_stats(event_id)
-    if not stats:
-        return None
-
-    shots_total = stats["shots_total"]
-    shots_on = stats["shots_on_target"]
-    corners = stats["corners"]
-    dang = stats["dangerous_attacks"]
-
-    # ------------------ ALERTA DE TESTE -------------------
-    if shots_on >= 5:
-        msg = f"""
-🔥 <b>ALERTA OVER (TESTE)</b>
-
-⚽ <b>{home}</b> x <b>{away}</b>
-⏱ Minuto: <b>{minute}</b>
-
-🎯 Finalizações totais: <b>{shots_total}</b>
-🥅 No alvo: <b>{shots_on}</b>
-⛳ Escanteios: <b>{corners}</b>
-⚡ Ataques perigosos: <b>{dang}</b>
-
-🧪 Regra de teste: 5 finalizações no alvo!
-"""
-        return msg
-
-    return None
-
-
-# ======================================================
-# EXECUTAR ROBÔ EM LOOP
-# ======================================================
-def run_bot():
-    already_sent = set()
-
-    while True:
-        print("🔄 Rodando... buscando jogos ao vivo.")
-        games = get_live_games()
-        print(f"📊 Jogos encontrados: {len(games)}")
-
-        for event in games:
-
-            try:
-                home = event["homeTeam"]["name"]
-                away = event["awayTeam"]["name"]
-                print(f"⚽ Analisando: {home} x {away}")
-            except:
-                pass
-
-            alert = analyze_game(event)
-
-            if alert:
-                event_id = event["id"]
-                if event_id not in already_sent:
-                    print("🚨 ALERTA ENVIADO!")
-                    send_message(alert)
-                    already_sent.add(event_id)
-
-        print("⏳ Aguardando 60 segundos...\n")
-        time.sleep(60)
-
-
-# ======================================================
-# INÍCIO
-# ======================================================
-if __name__ == "__main__":
-    run_bot()
+                        
