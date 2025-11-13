@@ -124,7 +124,7 @@ def analyze_game(event):
 
  # ALERTA MODO TESTE – 5 finalizações no alvo
 if shots_on >= 5:
- msg = f"""
+    msg = f"""
 🔥 <b>ALERTA OVER (TESTE)</b>
 
 🏟 <b>{home} x {away}</b>
