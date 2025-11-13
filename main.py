@@ -1,6 +1,6 @@
 import requests
 import time
-
+from flask import Flask
 
 # ======================================================
 # CONFIGURAÇÕES — COLOQUE SEUS DADOS AQUI
@@ -175,7 +175,15 @@ def run_bot():
 
         print("⏳ Aguardando 60 segundos...\n")
         time.sleep(60)
+# ======================================================================
+# FLASK APENAS PARA HEALTHCHECK
+# ======================================================================
+from flask import Flask
+app = Flask(__name__)
 
+@app.route("/")
+def home():
+    return "BOT OVER GOLS RODANDO!"
 
 # ======================================================
 # INÍCIO
