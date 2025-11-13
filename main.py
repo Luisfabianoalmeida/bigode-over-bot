@@ -122,24 +122,22 @@ def analyze_game(event):
     # ----------------------------------------------
     pressure = (shots_total * 2) + (shots_on * 3) + (corners * 2) + (dang / 5)
 
-    # ENVIA ALERTA SE PRESSÃO ALTA
-    if pressure >= 15:
-        msg = f"""
-🔥 <b>ALERTA OVER (Pressão Agressiva)</b>
+ # ALERTA MODO TESTE – 5 finalizações no alvo
+if shots_on >= 5:
+ msg = f"""
+🔥 <b>ALERTA OVER (TESTE)</b>
 
 🏟 <b>{home} x {away}</b>
 ⏱ Minuto: <b>{minute}</b>
 
-🎯 Finalizações: <b>{shots_total}</b>
+🎯 Finalizações totais: <b>{shots_total}</b>
 🥅 No alvo: <b>{shots_on}</b>
 ⛳ Escanteios: <b>{corners}</b>
 ⚡ Ataques perigosos: <b>{dang}</b>
 
-🔥 Pressão: <b>{round(pressure, 1)}</b>
-
-👉 Oportunidade de <b>OVER GOLS</b> detectada!
+👉 Regra de teste: enviando alerta com 5 finalizações no alvo.
 """
-        return msg
+    return msg
 
     return None
 
